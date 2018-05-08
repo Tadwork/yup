@@ -402,7 +402,7 @@ describe('Mixed Types ', () => {
         name: 'max',
         test() {
           this.path.should.equal('test');
-          this.parent.should.eql({ other: 5, test: 'hi' });
+          this.parent.getMostRecent().should.eql({ other: 5, test: 'hi' });
           this.options.context.should.eql({ user: 'jason' });
           called = true;
           return true;
@@ -598,7 +598,7 @@ describe('Mixed Types ', () => {
       called = true;
     });
 
-    inst.cast({}, { value: { prop: 1, other: true } });
+    inst.cast({}, { context: { prop: 1, other: true } });
     called.should.equal(true);
 
     inst = mixed().when(['prop', 'other'], {
@@ -607,7 +607,7 @@ describe('Mixed Types ', () => {
     });
 
     return inst
-      .isValid(undefined, { value: { prop: 5, other: 5 } })
+      .isValid(undefined, { context: { prop: 5, other: 5 } })
       .should.eventually()
       .equal(false);
   });

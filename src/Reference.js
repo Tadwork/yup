@@ -1,6 +1,6 @@
 import { getter } from 'property-expr';
 import { isRelativePath, getRelativePath } from './util/makePath';
-
+import Parent from './Parent';
 let validateType = d => {
   if (typeof d !== 'string')
     throw new TypeError("ref's must be strings, got: " + d);
@@ -38,14 +38,14 @@ export default class Reference {
   }
 
   getValue(options) {
-    const { context, parent, path, value = {} } = options;
+    const { context, parent, path } = options;
     let refValue;
     if (this.isRelativePath) {
-      this.path = getRelativePath(path, this.key);
-      this._get = getter(this.path, true);
-      refValue = this._get(value);
+      let relativePath = getRelativePath(path, this.key);
+      refValue = getter(relativePath, true)(parent[0]);
     } else {
-      refValue = this._get(this.isContext ? context : parent || value);
+      let recentParent = parent ? new Parent(parent).getMostRecent() : context;
+      refValue = this._get(this.isContext ? context : recentParent);
     }
     return this.map(refValue);
   }

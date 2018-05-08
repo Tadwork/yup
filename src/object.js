@@ -4,6 +4,7 @@ import snakeCase from 'lodash/snakeCase';
 import camelCase from 'lodash/camelCase';
 import mapKeys from 'lodash/mapKeys';
 import transform from 'lodash/transform';
+
 import { getter } from 'property-expr';
 
 import MixedSchema from './mixed';
@@ -13,7 +14,7 @@ import sortByKeyOrder from './util/sortByKeyOrder';
 import inherits from './util/inherits';
 import makePath from './util/makePath';
 import runValidations, { propagateErrors } from './util/runValidations';
-
+import Parent from './Parent';
 let isObject = obj => Object.prototype.toString.call(obj) === '[object Object]';
 
 function unknown(ctx, value) {
@@ -81,11 +82,11 @@ inherits(ObjectSchema, MixedSchema, {
       strip = this._option('stripUnknown', options) === true,
       extra = Object.keys(value).filter(v => this._nodes.indexOf(v) === -1),
       props = this._nodes.concat(extra);
-
+    // is filled during the transform below
     let innerOptions = {
       ...options,
-      parent: {}, // is filled during the transform below
       __validating: false,
+      parent: new Parent(value, options.parent),
     };
 
     value = transform(
@@ -101,7 +102,6 @@ inherits(ObjectSchema, MixedSchema, {
           // safe to mutate since this is fired in sequence
           innerOptions.path = makePath`${options.path}.${prop}`;
           innerOptions.fieldValue = value[prop];
-
           field = field.resolve(innerOptions);
 
           if (field._strip === true) return;
@@ -111,13 +111,15 @@ inherits(ObjectSchema, MixedSchema, {
               ? field.cast(value[prop], innerOptions)
               : value[prop];
 
-          if (fieldValue !== undefined) obj[prop] = fieldValue;
-        } else if (exists && !strip) obj[prop] = value[prop];
+          if (fieldValue !== undefined) obj.getMostRecent()[prop] = fieldValue;
+        } else if (exists && !strip) {
+          obj.getMostRecent()[prop] = value[prop];
+        }
       },
       innerOptions.parent,
     );
 
-    return value;
+    return value.getMostRecent();
   },
 
   _validate(_value, opts = {}) {
@@ -151,7 +153,7 @@ inherits(ObjectSchema, MixedSchema, {
           let innerOptions = {
             ...opts,
             path,
-            parent: value,
+            parent: new Parent(value, opts.parent),
             originalValue: originalValue[key],
           };
 

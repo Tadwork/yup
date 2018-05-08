@@ -174,7 +174,6 @@ SchemaType.prototype = {
   },
 
   cast(value, options = {}) {
-    options.value = options.value || value;
     options.path = options.path || this._path;
     let resolvedSchema = this.resolve(options);
     let result = resolvedSchema._cast(value, options);
@@ -269,13 +268,11 @@ SchemaType.prototype = {
   },
 
   validate(value, options = {}) {
-    options.value = options.value || value;
     let schema = this.resolve(options);
     return schema._validate(value, options);
   },
 
   validateSync(value, options = {}) {
-    options.value = options.value || value;
     let schema = this.resolve(options);
     let result, err;
 

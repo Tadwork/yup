@@ -7,7 +7,7 @@ import makePath from './util/makePath';
 import MixedSchema from './mixed';
 import { mixed, array as locale } from './locale.js';
 import runValidations, { propagateErrors } from './util/runValidations';
-
+import Parent from './Parent';
 let hasLength = value => !isAbsent(value) && value.length > 0;
 
 export default ArraySchema;
@@ -81,7 +81,7 @@ inherits(ArraySchema, MixedSchema, {
             ...options,
             path,
             strict: true,
-            parent: value,
+            parent: new Parent(value, options.parent),
             fieldValue: value[idx],
             originalValue: originalValue[idx],
           };

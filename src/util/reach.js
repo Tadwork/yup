@@ -15,7 +15,7 @@ export default function reach(obj, path, fieldValue, context, value) {
     if (isArray || has(obj, '_subType')) {
       // we skipped an array: foo[].bar
       let idx = isArray ? parseInt(part, 10) : 0;
-      obj = obj.resolve({ context, parent, fieldValue, value })._subType;
+      obj = obj.resolve({ context, parent, fieldValue })._subType;
 
       if (fieldValue) {
         if (isArray && idx >= fieldValue.length) {
@@ -30,7 +30,7 @@ export default function reach(obj, path, fieldValue, context, value) {
     }
 
     if (!isArray) {
-      obj = obj.resolve({ context, parent, fieldValue, value });
+      obj = obj.resolve({ context, parent, fieldValue });
 
       if (!has(obj, 'fields') || !has(obj.fields, part))
         throw new Error(
